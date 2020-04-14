@@ -1,0 +1,2 @@
+Copyright © 2020 Luke Hollenback.
+All rights reserved.
