@@ -2,6 +2,7 @@ package gameserverservice
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -226,6 +227,14 @@ func (o *GameServerService) Stop() {
 func (o *GameServerService) SendAllMessage(msg *model.Msg) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
+
+	o.sendAllMessage(msg)
+}
+
+//
+// SendAllMessage sends the provided message to all connected clients.
+//
+func (o *GameServerService) sendAllMessage(msg *model.Msg) {
 	o.verifyRunning("Cannot send message.")
 
 	//
@@ -285,19 +294,24 @@ func (o *GameServerService) SendMessage(client *model.Client, msg *model.Msg) {
 // Kick forcefully disconnects the specified client and sends a message to the game world stating
 // the specified reason for the kick.
 //
-func (o *GameServerService) Kick(client *model.Client, reason string) {
+func (o *GameServerService) kick(client *model.Client, reason string) {
 	//
 	// Send a message to the world explaining that the client is being kicked.
 	//
 	msgData := &model.ChatMsg{
 		Author:  "Server",
-		Content: "Kicking player.",
+		Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", *client.Username(), reason),
 		Color:   model.ChatMsgColDef,
 	}
 
 	msg := model.CreateMsg(msgData)
 
-	o.SendAllMessage(msg)
+	o.sendAllMessage(msg)
+
+	//
+	// Actually disconnect the client.
+	//
+	client.TCPClient().Close()
 }
 
 //
@@ -347,7 +361,7 @@ func (o *GameServerService) kickTimedOutClients() {
 
 	for _, client := range o.clients {
 		if client.LastMsgTimestamp().Before(cutoff) {
-			o.Kick(client, "no message recieved in the last minute")
+			o.kick(client, "no message recieved in the last minute")
 		}
 	}
 }
