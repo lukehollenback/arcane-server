@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
-	"time"
+	"log"
+	"os"
+	"os/signal"
 
 	"github.com/lukehollenback/arcane-server/handler"
 	"github.com/lukehollenback/arcane-server/service/gameserverservice"
@@ -18,6 +20,14 @@ func init() {
 }
 
 func main() {
+	//
+	// Register a kill signal handler with the operating system so that we can gracefully shutdown if
+	// necessary.
+	//
+	osInterrupt := make(chan os.Signal, 1)
+
+	signal.Notify(osInterrupt, os.Interrupt)
+
 	//
 	// Load or default in the proper configuration.
 	//
@@ -41,13 +51,11 @@ func main() {
 	gameserverservice.Instance().Start()
 
 	//
-	// Loop indefinitely.
+	// Block until we are shut down by the operating system.
 	//
-	// NOTE: We must sleep in this loop so that we don't hammer the CPU.
-	//
-	// TODO: Listen for kill signals and graciously handle them.
-	//
-	for {
-		time.Sleep(10 * time.Second)
-	}
+	<-osInterrupt
+
+	gameserverservice.Instance().Stop()
+
+	log.Print("Goodbye.")
 }
