@@ -11,24 +11,25 @@ import (
 )
 
 func init() {
-	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(models.NewChatMsg)).Elem().Name(),
-		handleNewChatMsg)
+	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(msgmodels.Chat)).Elem().Name(),
+		handleChat)
 }
 
 //
 // handle is intended to be registered with the Message Handler Service to be used to actually
 // processes a recieved message.
 //
-func handleNewChatMsg(client *models.Client, rcvMsg *msgmodels.Msg) error {
+func handleChat(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	//
 	// Deserialize the data payload in the message.
 	//
-	rcvMsgData := new(models.NewChatMsg)
+	rcvMsgData := new(msgmodels.Chat)
 
 	mapstructure.Decode(rcvMsg.Data, rcvMsgData)
 
 	//
-	// Generate a "ChatMsg"-type message and send it to all connected players.
+	// Generate a "ChatMsg"-type message and send it to all connected players. If any fields were left
+	// out of the recieved payload, attempt to default them to the best possible value.
 	//
 	sndMsgData := &msgmodels.Chat{
 		Author:  *client.Username(),

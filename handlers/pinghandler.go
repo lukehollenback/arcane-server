@@ -16,14 +16,14 @@ const nanosInMilli = 1000000
 
 func init() {
 	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(msgmodels.Ping)).Elem().Name(),
-		handlePingMsg)
+		handlePing)
 }
 
 //
-// handlePingMsg is intended to be registered with the Message Handler Service to be used to
+// handlePing is intended to be registered with the Message Handler Service to be used to
 // actually processes a recieved message.
 //
-func handlePingMsg(client *models.Client, rcvMsg *msgmodels.Msg) error {
+func handlePing(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	//
 	// Deserialize the data payload in the message.
 	//
