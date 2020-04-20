@@ -10,5 +10,5 @@ func PkgInit() {
 	// NOTE: For this particular package, no initialization is necessary. This is simply called in
 	//  order to cause the various "init()" functions in this package to be fired by the runtime.
 
-	log.Print("The \"handler\" package has been initialized.")
+	log.Print("The \"handlers\" package has been initialized.")
 }

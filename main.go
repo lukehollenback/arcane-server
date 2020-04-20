@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/lukehollenback/arcane-server/handlers"
-	"github.com/lukehollenback/arcane-server/service/gameserverservice"
+	"github.com/lukehollenback/arcane-server/services/gameserverservice"
 	"github.com/lukehollenback/arcane-server/util"
 )
 

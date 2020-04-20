@@ -10,7 +10,7 @@ import (
 
 	"github.com/lukehollenback/arcane-server/models"
 	"github.com/lukehollenback/arcane-server/models/msgmodels"
-	"github.com/lukehollenback/arcane-server/service/msghandlerservice"
+	"github.com/lukehollenback/arcane-server/services/msghandlerservice"
 	"github.com/lukehollenback/packet-server/tcp"
 )
 
