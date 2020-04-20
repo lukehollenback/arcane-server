@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	tcpserver "github.com/lukehollenback/tcp-server"
+	"github.com/lukehollenback/packet-server/tcp"
 )
 
 //
@@ -13,7 +13,7 @@ import (
 //
 type Client struct {
 	mu            *sync.Mutex
-	tcpClient     *tcpserver.Client
+	tcpClient     *tcp.Client
 	authenticated bool
 	username      string
 	lastMsg       time.Time
@@ -23,7 +23,7 @@ type Client struct {
 // CreateClient constructes a new client structure instance (to represent a connected player) and
 // returns a pointer to it.
 //
-func CreateClient(tcpClient *tcpserver.Client) *Client {
+func CreateClient(tcpClient *tcp.Client) *Client {
 	client := &Client{
 		mu:            &sync.Mutex{},
 		tcpClient:     tcpClient,
@@ -47,7 +47,7 @@ func (o *Client) String() string {
 // TCPClient returns a pointer to the actual TCP/IP client object that can be used to communicate
 // with the client.
 //
-func (o *Client) TCPClient() *tcpserver.Client {
+func (o *Client) TCPClient() *tcp.Client {
 	return o.tcpClient
 }
 

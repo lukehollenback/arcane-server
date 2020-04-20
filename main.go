@@ -20,6 +20,9 @@ func init() {
 }
 
 func main() {
+	var err error
+	var ch <-chan bool
+
 	//
 	// Register a kill signal handler with the operating system so that we can gracefully shutdown if
 	// necessary.
@@ -42,20 +45,49 @@ func main() {
 	flag.Parse()
 
 	//
-	// Start the Game Server Service. Note that this service will start in its own goroutine.
+	// Start the Game Server Service.
 	//
 	gameserverservice.Instance().Config(&gameserverservice.Config{
 		TCPAddr:                    (*tcpBindAddress + ":" + *tcpBindPort),
 		ClientHeartbeatTimeoutSecs: 60,
 	})
-	gameserverservice.Instance().Start()
+	ch, err = gameserverservice.Instance().Start()
+	if err != nil {
+		log.Fatalf(
+			"An error occurred while attempting to start the Game Server Service. (Error: %s)",
+			err,
+		)
+	}
+
+	<-ch
+
+	//
+	// Log some debug info.
+	//
+	log.Print("All services are now online.")
 
 	//
 	// Block until we are shut down by the operating system.
 	//
 	<-osInterrupt
 
-	gameserverservice.Instance().Stop()
+	log.Print("An operating system interrupt has been recieved. Shutting down all services...")
 
+	//
+	// Shut down the Game Server Service.
+	//
+	ch, err = gameserverservice.Instance().Stop()
+	if err != nil {
+		log.Fatalf(
+			"An error occurred while attempting to stop the Game Server Service. (Error: %s)",
+			err,
+		)
+	}
+
+	<-ch
+
+	//
+	// Wrap everything up.
+	//
 	log.Print("Goodbye.")
 }
