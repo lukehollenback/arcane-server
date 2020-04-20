@@ -1,11 +1,12 @@
-package handler
+package handlers
 
 import (
 	"log"
 	"reflect"
 	"time"
 
-	"github.com/lukehollenback/arcane-server/model"
+	"github.com/lukehollenback/arcane-server/models"
+	"github.com/lukehollenback/arcane-server/models/msgmodels"
 	"github.com/lukehollenback/arcane-server/service/gameserverservice"
 	"github.com/lukehollenback/arcane-server/service/msghandlerservice"
 	"github.com/mitchellh/mapstructure"
@@ -14,7 +15,7 @@ import (
 const nanosInMilli = 1000000
 
 func init() {
-	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(model.PingMsg)).Elem().Name(),
+	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(msgmodels.Ping)).Elem().Name(),
 		handlePingMsg)
 }
 
@@ -22,11 +23,11 @@ func init() {
 // handlePingMsg is intended to be registered with the Message Handler Service to be used to
 // actually processes a recieved message.
 //
-func handlePingMsg(client *model.Client, rcvMsg *model.Msg) error {
+func handlePingMsg(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	//
 	// Deserialize the data payload in the message.
 	//
-	rcvMsgData := &model.PingMsg{}
+	rcvMsgData := &msgmodels.Ping{}
 
 	mapstructure.Decode(rcvMsg.Data, rcvMsgData)
 
@@ -53,11 +54,11 @@ func handlePingMsg(client *model.Client, rcvMsg *model.Msg) error {
 	//
 	// Generate and send a pong message back.
 	//
-	sndMsgData := &model.PingMsg{
+	sndMsgData := &msgmodels.Ping{
 		SentTime: (now.UnixNano() / nanosInMilli),
 	}
 
-	sndMsg := model.CreateMsg(sndMsgData)
+	sndMsg := msgmodels.CreateMsg(sndMsgData)
 
 	gameserverservice.Instance().SendMessage(client, sndMsg)
 

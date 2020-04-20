@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/lukehollenback/arcane-server/handler"
+	"github.com/lukehollenback/arcane-server/handlers"
 	"github.com/lukehollenback/arcane-server/service/gameserverservice"
 	"github.com/lukehollenback/arcane-server/util"
 )
@@ -16,7 +16,7 @@ func init() {
 	// Initialize any packages that require explicit probing (e.g. to cause their "init()" functions
 	// to fire).
 	//
-	handler.PkgInit()
+	handlers.PkgInit()
 }
 
 func main() {

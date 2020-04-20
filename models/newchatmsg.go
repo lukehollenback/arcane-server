@@ -1,4 +1,4 @@
-package model
+package models
 
 //
 // NewChatMsg represents the data payload of a "NewChatMsg"-type message that can be sent by a

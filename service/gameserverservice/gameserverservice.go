@@ -8,7 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lukehollenback/arcane-server/model"
+	"github.com/lukehollenback/arcane-server/models"
+	"github.com/lukehollenback/arcane-server/models/msgmodels"
 	"github.com/lukehollenback/arcane-server/service/msghandlerservice"
 	"github.com/lukehollenback/packet-server/tcp"
 )
@@ -19,15 +20,16 @@ var (
 )
 
 //
-// GameServerService represents an instance of the Game Server Service.
+// GameServerService represents an instance of the Game Server Service, which is responsible for
+// communicated with game clients over TCP/IP and UDP protocols.
 //
 type GameServerService struct {
-	mu          *sync.Mutex           // Mutex to protect against concurrent modification of the client table.
-	config      *Config               // Structure with the service's configuration parameters.
-	tcpServer   *tcp.Server           // Instance of a TCP/IP packet server used for interacting with clients.
-	clients     map[int]*model.Client // Table of known connected clients.
-	chHBKill    chan bool             // Channel that can be used to send a kill signal to the heartbeat watchdog goroutine.
-	chHBStopped chan bool             // Channel upon which the heartbeat watchdog goroutine will send a signal upon completing its shut-down process.
+	mu          *sync.Mutex            // Mutex to protect against concurrent modification of the client table.
+	config      *Config                // Structure with the service's configuration parameters.
+	tcpServer   *tcp.Server            // Instance of a TCP/IP packet server used for interacting with clients.
+	clients     map[int]*models.Client // Table of known connected clients.
+	chHBKill    chan bool              // Channel that can be used to send a kill signal to the heartbeat watchdog goroutine.
+	chHBStopped chan bool              // Channel upon which the heartbeat watchdog goroutine will send a signal upon completing its shut-down process.
 }
 
 //
@@ -69,7 +71,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
 	//
 	// (Re)-initialize some of the service's structures.
 	//
-	o.clients = make(map[int]*model.Client, 0)
+	o.clients = make(map[int]*models.Client, 0)
 	o.chHBKill = make(chan bool)
 	o.chHBStopped = make(chan bool)
 
@@ -82,7 +84,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
 			//
 			// Create a new client instance and add it to the service's client table.
 			//
-			client := model.CreateClient(tcpClient)
+			client := models.CreateClient(tcpClient)
 
 			o.addClient(client)
 		},
@@ -105,7 +107,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
 			// TODO: If too many bogus messages are recieved from the same client, we should kick that
 			//  client off. Such a scenario could be a potential attack.
 			//
-			var m model.Msg
+			var m msgmodels.Msg
 
 			unmarshallErr := json.Unmarshal([]byte(msg), &m)
 			if unmarshallErr != nil {
@@ -191,14 +193,14 @@ func (o *GameServerService) Stop() (<-chan bool, error) {
 //
 // SendAllMessage sends the provided message to all connected clients.
 //
-func (o *GameServerService) SendAllMessage(msg *model.Msg) {
+func (o *GameServerService) SendAllMessage(msg *msgmodels.Msg) {
 	o.sendAllMessage(msg)
 }
 
 //
 // SendMessage sends the provided message to the provided client.
 //
-func (o *GameServerService) SendMessage(client *model.Client, msg *model.Msg) {
+func (o *GameServerService) SendMessage(client *models.Client, msg *msgmodels.Msg) {
 	//
 	// Serialize the message.
 	//
@@ -228,7 +230,7 @@ func (o *GameServerService) SendMessage(client *model.Client, msg *model.Msg) {
 //
 // SendAllMessage sends the provided message to all connected clients.
 //
-func (o *GameServerService) sendAllMessage(msg *model.Msg) {
+func (o *GameServerService) sendAllMessage(msg *msgmodels.Msg) {
 	//
 	// Serialize the message.
 	//
@@ -259,17 +261,17 @@ func (o *GameServerService) sendAllMessage(msg *model.Msg) {
 // Kick forcefully disconnects the specified client and sends a message to the game world stating
 // the specified reason for the kick.
 //
-func (o *GameServerService) kick(client *model.Client, reason string) {
+func (o *GameServerService) kick(client *models.Client, reason string) {
 	//
 	// Send a message to the world explaining that the client is being kicked.
 	//
-	msgData := &model.ChatMsg{
+	msgData := &msgmodels.Chat{
 		Author:  "Server",
 		Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", *client.Username(), reason),
-		Color:   model.ChatMsgColDef,
+		Color:   msgmodels.ChatColDef,
 	}
 
-	msg := model.CreateMsg(msgData)
+	msg := msgmodels.CreateMsg(msgData)
 
 	o.sendAllMessage(msg)
 
@@ -326,7 +328,7 @@ func (o *GameServerService) kickTimedOutClients() {
 //
 // addClient adds the provided client to the client table.
 //
-func (o *GameServerService) addClient(client *model.Client) {
+func (o *GameServerService) addClient(client *models.Client) {
 	// NOTE: We must lock because we are going to mutate the client table. Multiple goroutines may be
 	//  attempting to do the same around the same time.
 

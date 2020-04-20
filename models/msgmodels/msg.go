@@ -1,4 +1,4 @@
-package model
+package msgmodels
 
 import (
 	"encoding/json"

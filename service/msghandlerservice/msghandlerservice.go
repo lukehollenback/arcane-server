@@ -5,7 +5,8 @@ import (
 	"log"
 	"sync"
 
-	"github.com/lukehollenback/arcane-server/model"
+	"github.com/lukehollenback/arcane-server/models"
+	"github.com/lukehollenback/arcane-server/models/msgmodels"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 // MessageHandlerService represents an instance of the message handler service.
 //
 type MessageHandlerService struct {
-	handlers map[string]func(*model.Client, *model.Msg) error
+	handlers map[string]func(*models.Client, *msgmodels.Msg) error
 }
 
 //
@@ -26,7 +27,7 @@ type MessageHandlerService struct {
 func Instance() *MessageHandlerService {
 	once.Do(func() {
 		o = new(MessageHandlerService)
-		o.handlers = make(map[string]func(*model.Client, *model.Msg) error)
+		o.handlers = make(map[string]func(*models.Client, *msgmodels.Msg) error)
 	})
 
 	return o
@@ -36,7 +37,7 @@ func Instance() *MessageHandlerService {
 // RegisterMsgHandler registers a handler function to be executed when messages of the specified key
 // are recieved from clients.
 //
-func (o *MessageHandlerService) RegisterMsgHandler(key string, callback func(*model.Client, *model.Msg) error) {
+func (o *MessageHandlerService) RegisterMsgHandler(key string, callback func(*models.Client, *msgmodels.Msg) error) {
 	o.handlers[key] = callback
 
 	log.Printf("Registered new message handler for the message type key \"%s\".", key)
@@ -46,7 +47,7 @@ func (o *MessageHandlerService) RegisterMsgHandler(key string, callback func(*mo
 // ExecuteMsgHandler attempts to execute the appropriate registered handler function for the
 // provided message.
 //
-func (o *MessageHandlerService) ExecuteMsgHandler(client *model.Client, msg *model.Msg) error {
+func (o *MessageHandlerService) ExecuteMsgHandler(client *models.Client, msg *msgmodels.Msg) error {
 	//
 	// Attempt to retrieve the handler callback from the map of those that are registered.
 	//
