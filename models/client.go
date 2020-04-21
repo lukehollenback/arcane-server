@@ -52,10 +52,20 @@ func (o *Client) TCPClient() *tcp.Client {
 }
 
 //
-// Auth returns whether or not the client has successfully authenticated yet.
+// Authed returns whether or not the client has successfully authenticated yet.
 //
 func (o *Client) Authed() bool {
 	return o.authed
+}
+
+//
+// SetAuthed modifies the client's "authenticated" sentinel.
+//
+func (o *Client) SetAuthed(authed bool) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.authed = authed
 }
 
 //
@@ -63,6 +73,16 @@ func (o *Client) Authed() bool {
 //
 func (o *Client) AuthedID() string {
 	return o.authedID
+}
+
+//
+// SetAuthedID modifies the player ID against which client is "authenticated".
+//
+func (o *Client) SetAuthedID(authedID string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.authedID = authedID
 }
 
 //
