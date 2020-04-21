@@ -12,11 +12,11 @@ import (
 // Client represents a connected player.
 //
 type Client struct {
-	mu            *sync.Mutex
-	tcpClient     *tcp.Client
-	authenticated bool
-	username      string
-	lastMsg       time.Time
+	mu        *sync.Mutex // Mutex to prevent concurrent modification issues when mutating struct members.
+	tcpClient *tcp.Client // The actual TCP/IP packet server client instance that is interacting with the client.
+	authed    bool        // Whether or not the client has successfully authenticated yet. Some message handlers will fail until this is true.
+	authedID  string      // The Player ID that the client authenticated themselves to be.
+	lastMsg   time.Time   // Timestamp of when the last known message was recieved from the client.
 }
 
 //
@@ -25,11 +25,11 @@ type Client struct {
 //
 func CreateClient(tcpClient *tcp.Client) *Client {
 	client := &Client{
-		mu:            &sync.Mutex{},
-		tcpClient:     tcpClient,
-		authenticated: false,
-		username:      "Unknown",
-		lastMsg:       time.Now(),
+		mu:        &sync.Mutex{},
+		tcpClient: tcpClient,
+		authed:    false,
+		authedID:  "Unknown",
+		lastMsg:   time.Now(),
 	}
 
 	return client
@@ -40,7 +40,7 @@ func CreateClient(tcpClient *tcp.Client) *Client {
 //
 func (o *Client) String() string {
 	return fmt.Sprintf("username: %s, authed: %t, lastMsg: %s, tcpRemoteAddr: %s, tcpLocalAddr: %s",
-		o.username, o.authenticated, o.lastMsg, o.TCPRemoteAddr(), o.TCPLocalAddr())
+		o.authedID, o.authed, o.lastMsg, o.TCPRemoteAddr(), o.TCPLocalAddr())
 }
 
 //
@@ -52,10 +52,17 @@ func (o *Client) TCPClient() *tcp.Client {
 }
 
 //
-// Username returns a pointer to the client's authenticated username.
+// Auth returns whether or not the client has successfully authenticated yet.
 //
-func (o *Client) Username() *string {
-	return &o.username
+func (o *Client) Authed() bool {
+	return o.authed
+}
+
+//
+// AuthedID returns a pointer to the client's authenticated Player ID.
+//
+func (o *Client) AuthedID() string {
+	return o.authedID
 }
 
 //

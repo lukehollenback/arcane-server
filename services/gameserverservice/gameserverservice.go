@@ -41,7 +41,7 @@ type Config struct {
 }
 
 //
-// Instance provides a singleton instance of the message handler service.
+// Instance provides a singleton instance of the service.
 //
 func Instance() *GameServerService {
 	once.Do(func() {
@@ -267,7 +267,7 @@ func (o *GameServerService) kick(client *models.Client, reason string) {
 	//
 	msgData := &msgmodels.Chat{
 		Author:  "Server",
-		Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", *client.Username(), reason),
+		Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", client.AuthedID(), reason),
 		Color:   msgmodels.ChatColDef,
 	}
 

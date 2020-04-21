@@ -7,6 +7,8 @@ import (
 	"github.com/lukehollenback/arcane-server/models/msgmodels"
 	"github.com/lukehollenback/arcane-server/services/gameserverservice"
 	"github.com/lukehollenback/arcane-server/services/msghandlerservice"
+	"github.com/lukehollenback/arcane-server/services/playerinfoservice"
+	"github.com/lukehollenback/arcane-server/util"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -28,13 +30,19 @@ func handleChat(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	mapstructure.Decode(rcvMsg.Data, rcvMsgData)
 
 	//
-	// Generate a "ChatMsg"-type message and send it to all connected players. If any fields were left
-	// out of the recieved payload, attempt to default them to the best possible value.
+	// Generate a "ChatMsg"-type message and send it to all connected players. To prevent the ability
+	// for any players to be weird and spoof their username, said field is always looked up – even if
+	// it was provided. If a color was optionally provided, it will be used.
 	//
+	// TODO: Validate everything – content (for excessive whitespace, illegal characters, and so on),
+	//  color (to be allowed according to the senders permissions), and so on.
+	//
+	sndMsgAuthor := playerinfoservice.Instance().GetUsername(client.AuthedID())
+	sndMsgColor := util.GetStrVal(rcvMsgData.Color, msgmodels.ChatColDef)
 	sndMsgData := &msgmodels.Chat{
-		Author:  *client.Username(),
+		Author:  sndMsgAuthor,
 		Content: rcvMsgData.Content,
-		Color:   msgmodels.ChatColDef,
+		Color:   sndMsgColor,
 	}
 
 	sndMsg := msgmodels.CreateMsg(sndMsgData)

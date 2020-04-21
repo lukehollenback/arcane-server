@@ -8,6 +8,7 @@ import (
 
 	"github.com/lukehollenback/arcane-server/handlers"
 	"github.com/lukehollenback/arcane-server/services/gameserverservice"
+	"github.com/lukehollenback/arcane-server/services/playerinfoservice"
 	"github.com/lukehollenback/arcane-server/util"
 )
 
@@ -45,6 +46,16 @@ func main() {
 	flag.Parse()
 
 	//
+	// Start the Player Info Service.
+	//
+	ch, err = playerinfoservice.Instance().Start()
+	if err != nil {
+		log.Fatalf("Failed to start the Player Info Service. (Error: %s)", err)
+	}
+
+	<-ch
+
+	//
 	// Start the Game Server Service.
 	//
 	gameserverservice.Instance().Config(&gameserverservice.Config{
@@ -53,10 +64,7 @@ func main() {
 	})
 	ch, err = gameserverservice.Instance().Start()
 	if err != nil {
-		log.Fatalf(
-			"An error occurred while attempting to start the Game Server Service. (Error: %s)",
-			err,
-		)
+		log.Fatalf("Failed to start the Game Server Service. (Error: %s)", err)
 	}
 
 	<-ch
@@ -78,10 +86,17 @@ func main() {
 	//
 	ch, err = gameserverservice.Instance().Stop()
 	if err != nil {
-		log.Fatalf(
-			"An error occurred while attempting to stop the Game Server Service. (Error: %s)",
-			err,
-		)
+		log.Fatalf("Failed to stop the Game Server Service. (Error: %s)", err)
+	}
+
+	<-ch
+
+	//
+	// Shut down the Player Info Service.
+	//
+	ch, err = playerinfoservice.Instance().Stop()
+	if err != nil {
+		log.Fatalf("Failed to stop the Player Info Service. (Error: %s)", err)
 	}
 
 	<-ch
