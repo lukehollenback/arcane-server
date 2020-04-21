@@ -15,8 +15,11 @@ import (
 const nanosInMilli = 1000000
 
 func init() {
-	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(msgmodels.Ping)).Elem().Name(),
-		handlePing)
+	msghandlerservice.Instance().RegisterMsgHandler(
+		reflect.TypeOf(new(msgmodels.Ping)).Elem().Name(),
+		false,
+		handlePing,
+	)
 }
 
 //

@@ -13,8 +13,11 @@ import (
 )
 
 func init() {
-	msghandlerservice.Instance().RegisterMsgHandler(reflect.TypeOf(new(msgmodels.Chat)).Elem().Name(),
-		handleChat)
+	msghandlerservice.Instance().RegisterMsgHandler(
+		reflect.TypeOf(new(msgmodels.Chat)).Elem().Name(),
+		true,
+		handleChat,
+	)
 }
 
 //
