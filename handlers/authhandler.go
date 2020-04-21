@@ -38,19 +38,28 @@ func handleAuth(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	client.SetAuthed(true)
 
 	//
-	// Generate and send a pong message back.
+	// Generate and send a "successful authentication" message back to the client.
 	//
-	username := playerinfoservice.Instance().GetUsername(client.AuthedID())
-	content := fmt.Sprintf("Welcome, %s!", username)
-	sndMsgData := &msgmodels.Chat{
+	authData := &msgmodels.Auth{
+		Token: rcvMsgData.Token,
+	}
+	authMsg := msgmodels.CreateMsg(authData)
+
+	gameserverservice.Instance().SendMessage(client, authMsg)
+
+	//
+	// Generate and send a welcome chat message.
+	//
+	chatUsername := playerinfoservice.Instance().GetUsername(client.AuthedID())
+	chatContent := fmt.Sprintf("Welcome, %s!", chatUsername)
+	chatData := &msgmodels.Chat{
 		Author:  "Server",
-		Content: content,
+		Content: chatContent,
 		Color:   msgmodels.ChatColSvr,
 	}
+	chatMsg := msgmodels.CreateMsg(chatData)
 
-	sndMsg := msgmodels.CreateMsg(sndMsgData)
-
-	gameserverservice.Instance().SendAllMessage(sndMsg)
+	gameserverservice.Instance().SendAllMessage(chatMsg)
 
 	return nil
 }
