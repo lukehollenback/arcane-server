@@ -63,7 +63,7 @@ func (o *GameServerService) Config(config *Config) {
 }
 
 //
-// Start fires up the Game Server Service in its own goroutine.
+// Start implements the method defined by the services.Stop() interface.
 //
 func (o *GameServerService) Start() (<-chan bool, error) {
 	log.Printf("The Game Server Service is starting...")
@@ -163,7 +163,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
 }
 
 //
-// Stop shuts down the Game Server Service.
+// Stop implements the method defined by the services.Stop() interface.
 //
 func (o *GameServerService) Stop() (<-chan bool, error) {
 	log.Printf("The Game Server Service is stopping...")
