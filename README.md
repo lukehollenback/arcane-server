@@ -2,7 +2,8 @@
 
 ![Status: Work in Progress](https://img.shields.io/badge/Status-Work&#32;in&#32;Progress-blue.svg)
 
-A server for the retro-style MMORPG Arcane written in Go.
+A server for the retro-style MMORPG Arcane written in Go. See also the
+[arcane](https://github.com/lukehollenback/arcane) repo.
 
 ## Copyright & Licensing
 
