@@ -2,5 +2,9 @@ github.com/lukehollenback/packet-server v0.0.0-20200419014403-997999dd91a3 h1:CQ
 github.com/lukehollenback/packet-server v0.0.0-20200419014403-997999dd91a3/go.mod h1:Ug55OGxwWBmUK7RjuNDdH0jvd7bmYC5gX70TC9zpBWM=
 github.com/lukehollenback/packet-server v0.0.0-20200420021704-bca8b5416a13 h1:up++rFap+kgSnTVWr/Jr+0STWGt3tcQYP1YASUoiacU=
 github.com/lukehollenback/packet-server v0.0.0-20200420021704-bca8b5416a13/go.mod h1:Ug55OGxwWBmUK7RjuNDdH0jvd7bmYC5gX70TC9zpBWM=
+github.com/lukehollenback/packet-server v0.0.0-20200423003811-cf34c79de9b2 h1:rYj9GlLSn24DR9mpDxUSrMEcsibfhLUruiLmdGIpNes=
+github.com/lukehollenback/packet-server v0.0.0-20200423003811-cf34c79de9b2/go.mod h1:Ug55OGxwWBmUK7RjuNDdH0jvd7bmYC5gX70TC9zpBWM=
+github.com/lukehollenback/packet-server v0.0.0-20200423010303-139b80f7fa1b h1:SxvSIzr7GjcFVdTerEnt8edUDs4jbRIP3bb9c9oVA9g=
+github.com/lukehollenback/packet-server v0.0.0-20200423010303-139b80f7fa1b/go.mod h1:Ug55OGxwWBmUK7RjuNDdH0jvd7bmYC5gX70TC9zpBWM=
 github.com/mitchellh/mapstructure v1.2.2 h1:dxe5oCinTXiTIcfgmZecdCzPmAJKd46KsCWc35r0TV4=
 github.com/mitchellh/mapstructure v1.2.2/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=

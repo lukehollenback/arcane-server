@@ -80,6 +80,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
 	//
 	o.tcpServer = tcp.CreateServer(&tcp.ServerConfig{
 		Address: o.config.TCPAddr,
+		Delim:   '\x00',
 		OnNewClient: func(tcpClient *tcp.Client) {
 			//
 			// Create a new client instance and add it to the service's client table.
@@ -99,7 +100,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
 			//
 			// Clean the message.
 			//
-			msg = strings.TrimRight(msg, "\n")
+			msg = strings.Trim(msg, "\x00")
 
 			//
 			// Deserialize the message. If this fails, it is a bogus message.
@@ -216,12 +217,6 @@ func (o *GameServerService) SendMessage(client *models.Client, msg *msgmodels.Ms
 	log.Printf("%s%s", client.SndLogPrefix(), rawMsg)
 
 	//
-	// Add a delimiter to the end of the serialized message so that our network protocol knows how to
-	// buffer it properly.
-	//
-	rawMsg = append(rawMsg, '\n')
-
-	//
 	// Fire off the message to the client.
 	//
 	client.TCPClient().SendBytes(rawMsg)
@@ -244,12 +239,6 @@ func (o *GameServerService) sendAllMessage(msg *msgmodels.Msg) {
 	// Log the message.
 	//
 	log.Printf("<~>           %-21s <~ %s", "All Connected Clients", rawMsg)
-
-	//
-	// Add a delimiter to the end of the serialized message so that our network protocol knows how to
-	// buffer it properly.
-	//
-	rawMsg = append(rawMsg, '\n')
 
 	//
 	// Fire off the raw message to all connected clients.

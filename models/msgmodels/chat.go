@@ -7,11 +7,6 @@ const (
 	ChatColDef = "default"
 
 	//
-	// ChatColGame is the color of game-related (e.g. NPC conversation) messages.
-	//
-	ChatColGame = "game"
-
-	//
 	// ChatColMod is the color of moderator-sent messages.
 	//
 	ChatColMod = "moderator"
@@ -19,7 +14,17 @@ const (
 	//
 	// ChatColSvr is the color of server-sent messages.
 	//
-	ChatColSvr = "Server"
+	ChatColSvr = "server"
+
+	//
+	// ChatColGame is the color of game-related (e.g. NPC conversation) messages.
+	//
+	ChatColGame = "game"
+
+	//
+	// ChatColSystem is the color of system-related (e.g. command help) messages.
+	//
+	ChatColSys = "system"
 )
 
 //
