@@ -22,7 +22,7 @@ const (
 	ChatColGame = "game"
 
 	//
-	// ChatColSystem is the color of system-related (e.g. command help) messages.
+	// ChatColSys is the color of system-related (e.g. command help) messages.
 	//
 	ChatColSys = "system"
 )
