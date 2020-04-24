@@ -254,15 +254,24 @@ func (o *GameServerService) kick(client *models.Client, reason string) {
 	//
 	// Send a message to the world explaining that the client is being kicked.
 	//
-	msgData := &msgmodels.Chat{
+	chatMsgData := &msgmodels.Chat{
 		Author:  "Server",
 		Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", client.AuthedID(), reason),
-		Color:   msgmodels.ChatColDef,
+		Color:   msgmodels.ChatColSvr,
 	}
+	chatMsg := msgmodels.CreateMsg(chatMsgData)
 
-	msg := msgmodels.CreateMsg(msgData)
+	o.sendAllMessage(chatMsg)
 
-	o.sendAllMessage(msg)
+	//
+	// Send a disconnect message to the client being kicked.
+	//
+	discMsgData := &msgmodels.Disc{
+		Reason: reason,
+	}
+	discMsg := msgmodels.CreateMsg(discMsgData)
+
+	o.SendMessage(client, discMsg)
 
 	//
 	// Actually disconnect the client.
@@ -309,7 +318,7 @@ func (o *GameServerService) kickTimedOutClients() {
 
 	for _, client := range o.clients {
 		if client.LastMsgTimestamp().Before(cutoff) {
-			o.kick(client, "no message recieved in the last minute")
+			o.kick(client, "No message recieved in the last minute.")
 		}
 	}
 }
