@@ -11,6 +11,7 @@ import (
 	"github.com/lukehollenback/arcane-server/models"
 	"github.com/lukehollenback/arcane-server/models/msgmodels"
 	"github.com/lukehollenback/arcane-server/services/msghandlerservice"
+	"github.com/lukehollenback/arcane-server/util"
 	"github.com/lukehollenback/packet-server/tcp"
 )
 
@@ -192,13 +193,6 @@ func (o *GameServerService) Stop() (<-chan bool, error) {
 }
 
 //
-// SendAllMessage sends the provided message to all connected clients.
-//
-func (o *GameServerService) SendAllMessage(msg *msgmodels.Msg) {
-	o.sendAllMessage(msg)
-}
-
-//
 // SendMessage sends the provided message to the provided client.
 //
 func (o *GameServerService) SendMessage(client *models.Client, msg *msgmodels.Msg) {
@@ -223,9 +217,10 @@ func (o *GameServerService) SendMessage(client *models.Client, msg *msgmodels.Ms
 }
 
 //
-// SendAllMessage sends the provided message to all connected clients.
+// SendAllMessage sends the provided message to all connected clients except for those specified to
+// be excluded.
 //
-func (o *GameServerService) sendAllMessage(msg *msgmodels.Msg) {
+func (o *GameServerService) SendAllMessage(msg *msgmodels.Msg, excludedClientIDs []int) {
 	//
 	// Serialize the message.
 	//
@@ -241,9 +236,17 @@ func (o *GameServerService) sendAllMessage(msg *msgmodels.Msg) {
 	log.Printf("<~>           %-21s <~ %s", "All Connected Clients", rawMsg)
 
 	//
-	// Fire off the raw message to all connected clients.
+	// Fire off the raw message to all connected clients except for those that are excluded.
 	//
-	o.tcpServer.SendBytesAll(rawMsg)
+	// TODO: In the future, we could probably spin off goroutines here to do this even faster.
+	//
+	for id, client := range o.clients {
+		if excludedClientIDs != nil && util.SliceContainsInt(id, excludedClientIDs) {
+			continue
+		}
+
+		client.TCPClient().SendBytes(rawMsg)
+	}
 }
 
 //
@@ -261,7 +264,7 @@ func (o *GameServerService) kick(client *models.Client, reason string) {
 	}
 	chatMsg := msgmodels.CreateMsg(chatMsgData)
 
-	o.sendAllMessage(chatMsg)
+	o.SendAllMessage(chatMsg, nil)
 
 	//
 	// Send a disconnect message to the client being kicked.

@@ -59,7 +59,7 @@ func handleAuth(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	}
 	chatMsg := msgmodels.CreateMsg(chatData)
 
-	gameserverservice.Instance().SendAllMessage(chatMsg)
+	gameserverservice.Instance().SendAllMessage(chatMsg, nil)
 
 	return nil
 }

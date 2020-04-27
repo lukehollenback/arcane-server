@@ -50,7 +50,7 @@ func handleChat(client *models.Client, rcvMsg *msgmodels.Msg) error {
 
 	sndMsg := msgmodels.CreateMsg(sndMsgData)
 
-	gameserverservice.Instance().SendAllMessage(sndMsg)
+	gameserverservice.Instance().SendAllMessage(sndMsg, nil)
 
 	return nil
 }
