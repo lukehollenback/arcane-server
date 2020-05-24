@@ -35,13 +35,17 @@ func main() {
 	//
 	// Load or default in the proper configuration.
 	//
-	tcpBindAddress := flag.String("addr", util.GetEnv("TCP_BIND_ADDRESS", "localhost"),
+	tcpBindAddress := flag.String("addr", util.GetEnv(
+		"TCP_BIND_ADDRESS", "localhost"),
 		"The ip address that the server should bind to for listening. Can also be specified via the "+
-			"\"TCP_BIND_ADDRESS\" environment variable.")
+			"\"TCP_BIND_ADDRESS\" environment variable.",
+	)
 
-	tcpBindPort := flag.String("tcpport", util.GetEnv("TCP_BIND_PORT", "6543"),
+	tcpBindPort := flag.String(
+		"tcpport", util.GetEnv("TCP_BIND_PORT", "6543"),
 		"The TCP/IP port that the server should bind to for listening. Can also be specified via the "+
-			"\"TCP_BIND_PORT\" environment variable.")
+			"\"TCP_BIND_PORT\" environment variable.",
+		)
 
 	flag.Parse()
 
@@ -59,7 +63,7 @@ func main() {
 	// Start the Game Server Service.
 	//
 	gameserverservice.Instance().Config(&gameserverservice.Config{
-		TCPAddr:                    (*tcpBindAddress + ":" + *tcpBindPort),
+		TCPAddr:                    *tcpBindAddress + ":" + *tcpBindPort,
 		ClientHeartbeatTimeoutSecs: 60,
 	})
 	ch, err = gameserverservice.Instance().Start()
@@ -79,7 +83,7 @@ func main() {
 	//
 	<-osInterrupt
 
-	log.Print("An operating system interrupt has been recieved. Shutting down all services...")
+	log.Print("An operating system interrupt has been received. Shutting down all services...")
 
 	//
 	// Shut down the Game Server Service.

@@ -9,4 +9,5 @@ type CharacterCreate struct {
 	ClientID int    // The client ID of the character instance. For use in things like client tables.
 	X        int    // The initial horizontal location of the relevant character instance.
 	Y        int    // The initial vertical location of the relevant character instance.
+	Depth    int    // The depth that the relevant character should exist in the room that that it is instantiated into.
 }
