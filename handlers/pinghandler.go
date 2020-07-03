@@ -18,7 +18,7 @@ func init() {
 	msghandlerservice.Instance().RegisterMsgHandler(
 		reflect.TypeOf(new(msgmodels.Ping)).Elem().Name(),
 		false,
-		handleAuth,
+		handlePing,
 	)
 }
 

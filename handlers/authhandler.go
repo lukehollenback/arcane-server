@@ -50,7 +50,7 @@ func handleAuth(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	//
 	// Generate and send a welcome chat message.
 	//
-	chatUsername := playerinfoservice.Instance().GetUsername(client.AuthedID())
+	chatUsername := playerinfoservice.Instance().GetUsername(client.PlayerID())
 	chatContent := fmt.Sprintf("Welcome, %s!", chatUsername)
 	chatData := &msgmodels.Chat{
 		Author:  "Server",

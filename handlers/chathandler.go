@@ -40,7 +40,7 @@ func handleChat(client *models.Client, rcvMsg *msgmodels.Msg) error {
 	// TODO: Validate everything – content (for excessive whitespace, illegal characters, and so on),
 	//  color (to be allowed according to the senders permissions), and so on.
 	//
-	sndMsgAuthor := playerinfoservice.Instance().GetUsername(client.AuthedID())
+	sndMsgAuthor := playerinfoservice.Instance().GetUsername(client.PlayerID())
 	sndMsgColor := util.GetStrVal(rcvMsgData.Color, msgmodels.ChatColDef)
 	sndMsgData := &msgmodels.Chat{
 		Author:  sndMsgAuthor,

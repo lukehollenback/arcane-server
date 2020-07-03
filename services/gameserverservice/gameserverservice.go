@@ -25,12 +25,13 @@ var (
 // communicated with game clients over TCP/IP and UDP protocols.
 //
 type GameServerService struct {
-  mu          *sync.Mutex            // Mutex to protect against concurrent modification of the client table.
-  config      *Config                // Structure with the service's configuration parameters.
-  tcpServer   *tcp.Server            // Instance of a TCP/IP packet server used for interacting with clients.
-  clients     map[int]*models.Client // Table of known connected clients.
-  chHBKill    chan bool              // Channel that can be used to send a kill signal to the heartbeat watchdog goroutine.
-  chHBStopped chan bool              // Channel upon which the heartbeat watchdog goroutine will send a signal upon completing its shut-down process.
+  mu          *sync.Mutex               // Mutex to protect against concurrent modification of the client table.
+  config      *Config                   // Structure with the service's configuration parameters.
+  tcpServer   *tcp.Server               // Instance of a TCP/IP packet server used for interacting with clients.
+  clients     map[int]*models.Client    // Table of known connected clients keyed by their TCP/IP identifier.
+  objects     map[string]*models.Object // Table of known synchronized objects keyed by their unique object identifier.
+  chHBKill    chan bool                 // Channel that can be used to send a kill signal to the heartbeat watchdog goroutine.
+  chHBStopped chan bool                 // Channel upon which the heartbeat watchdog goroutine will send a signal upon completing its shut-down process.
 }
 
 //
@@ -73,6 +74,7 @@ func (o *GameServerService) Start() (<-chan bool, error) {
   // (Re)-initialize some of the service's structures.
   //
   o.clients = make(map[int]*models.Client, 0)
+  o.objects = make(map[string]*models.Object, 0)
   o.chHBKill = make(chan bool)
   o.chHBStopped = make(chan bool)
 
@@ -91,16 +93,18 @@ func (o *GameServerService) Start() (<-chan bool, error) {
       client := models.CreateClient(tcpClient)
 
       o.addClient(client)
+      o.addObject(client)
 
       //
       // Tell the new client where to instantiate itself.
       //
-      msg = msgmodels.CreateMsg(&msgmodels.CharacterCreate{
-        Type:     "oLocalPlayer",
-        ClientID: client.TCPClient().ID(),
-        X:        224,
-        Y:        160,
-        Depth:    400,
+      msg = msgmodels.CreateMsg(&msgmodels.ObjCreate{
+        Type:     "oPlayer",
+        ObjectID: client.ObjectID(),
+        AreaID:   client.AreaID(),
+        X:        client.X(),
+        Y:        client.Y(),
+        Depth:    client.Depth(),
       })
 
       o.SendMessage(client, msg)
@@ -113,12 +117,13 @@ func (o *GameServerService) Start() (<-chan bool, error) {
           continue
         }
 
-        msg = msgmodels.CreateMsg(&msgmodels.CharacterCreate{
-          Type:     "oRemotePlayer",
-          ClientID: otherClient.TCPClient().ID(),
-          X:        224,
-          Y:        160,
-          Depth:    400,
+        msg = msgmodels.CreateMsg(&msgmodels.ObjCreate{
+          Type:     "oOtherPlayer",
+          ObjectID: otherClient.ObjectID(),
+          AreaID:   otherClient.AreaID(),
+          X:        otherClient.X(),
+          Y:        otherClient.Y(),
+          Depth:    otherClient.Depth(),
         })
 
         o.SendMessage(client, msg)
@@ -127,12 +132,13 @@ func (o *GameServerService) Start() (<-chan bool, error) {
       //
       // Tell all the other clients where to instantiate the new client.
       //
-      msg = msgmodels.CreateMsg(&msgmodels.CharacterCreate{
-        Type:     "oRemotePlayer",
-        ClientID: client.TCPClient().ID(),
-        X:        224,
-        Y:        160,
-        Depth:    400,
+      msg = msgmodels.CreateMsg(&msgmodels.ObjCreate{
+        Type:     "oOtherPlayer",
+        ObjectID: client.ObjectID(),
+        AreaID:   client.AreaID(),
+        X:        client.X(),
+        Y:        client.Y(),
+        Depth:    client.Depth(),
       })
 
       o.SendAllMessage(msg, []int{client.TCPClient().ID()})
@@ -189,7 +195,10 @@ func (o *GameServerService) Start() (<-chan bool, error) {
       }
     },
     OnClientConnectionClosed: func(tcpClient *tcp.Client) {
+      client := o.clients[tcpClient.ID()]
+
       o.forgetClient(tcpClient.ID())
+      o.forgetObject(client.ObjectID())
     },
   })
 
@@ -312,7 +321,7 @@ func (o *GameServerService) kick(client *models.Client, reason string) {
   //
   chatMsgData := &msgmodels.Chat{
     Author:  "Server",
-    Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", client.AuthedID(), reason),
+    Content: fmt.Sprintf("Kicking player %s. (Reason: %s)", client.PlayerID(), reason),
     Color:   msgmodels.ChatColSvr,
   }
   chatMsg := msgmodels.CreateMsg(chatMsgData)
@@ -393,7 +402,20 @@ func (o *GameServerService) addClient(client *models.Client) {
 }
 
 //
-// forgetClient removes the provided client from the client table.
+// addObject adds the provided object to the objects table.
+//
+func (o *GameServerService) addObject(object models.Object) {
+  // NOTE: We must lock because we are going to mutate the objects table. Multiple goroutines may be
+  //  attempting to do the same around the same time.
+
+  o.mu.Lock()
+  defer o.mu.Unlock()
+
+  o.objects[object.ObjectID()] = &object
+}
+
+//
+// forgetClient removes the provided client from the clients table.
 //
 func (o *GameServerService) forgetClient(id int) {
   // NOTE: We must lock because we are going to mutate the client table. Multiple goroutines may be
@@ -403,4 +425,17 @@ func (o *GameServerService) forgetClient(id int) {
   defer o.mu.Unlock()
 
   delete(o.clients, id)
+}
+
+//
+// forgetObject removes the provided object from the objects table.
+//
+func (o *GameServerService) forgetObject(id string) {
+  // NOTE: We must lock because we are going to mutate the objects table. Multiple goroutines may be
+  //  attempting to do the same around the same time.
+
+  o.mu.Lock()
+  defer o.mu.Unlock()
+
+  delete(o.objects, id)
 }
