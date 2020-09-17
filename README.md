@@ -1,6 +1,8 @@
 # Arcane Server
 
-![Status: Work in Progress](https://img.shields.io/badge/Status-Work&#32;in&#32;Progress-blue.svg)
+<img src="https://img.shields.io/badge/status-On Hold-yellow.svg" alt="Status: On Hold"/>
+
+_**Author's Note (2020.9.16) ↝** The Arcane MMORPG project is currently on hold in order to make time for other endeavors. It currently has basic connection and syncronization functionality. Players can move around, chat with each other, and perform basic actions. System communication leverages a [JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC)-esque messaging protocol between the client and the server._
 
 A server for the retro-style MMORPG Arcane written in Go. See also the
 [arcane](https://github.com/lukehollenback/arcane) repo.
